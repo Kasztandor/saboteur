@@ -34,9 +34,9 @@ body{
     transform: translate(2px,2px);
 }
 #menu > div:nth-child(2) > div:hover:after{
+    content: "";
     position: absolute;
     z-index: -1;
-    content: "";
     display: block;
     left: 0;
     top: 0;
@@ -46,10 +46,37 @@ body{
     transform: translate(-2px,-2px);
     border-radius: 5px;
 }
-.popup{
+#popup{
     position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%,-50%);
     text-align: center;
+    padding: 25px;
+    border-radius: 5px;
+    border: 1px solid red;
+    background-color: #cc6600;
+    z-index: 2;
+}
+#popup:empty{
+    display: none;
+}
+#darkScreen{
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 1;
+}
+h1{
+    margin: 0;
+    padding: 0;
+}
+table{
+    margin: 10px 0;
+}
+td{
+    padding: 5px;
 }
