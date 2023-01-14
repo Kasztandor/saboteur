@@ -1,7 +1,9 @@
 let main = document.querySelector("main")
 let clientId = null
 let gameId = null
+let nickname = null
 let ws = null
+let clients = {}
 
 function menu(){
     main.innerHTML = `
@@ -41,7 +43,7 @@ function createGamePopup(){
             </td>
         </tr>
         </table>
-        <button onclick="createGame()">Create game</button>
+        <button onclick='startGame("create")'>Create game</button>
         <button onclick='closePopup()'>Cancel</button>
     `
 }
@@ -59,7 +61,7 @@ function joinGamePopup(){
             <td><input type="text" id="code"></td>
         </tr>
         </table>
-        <button onclick="joinGame()">Dołącz</button>
+        <button onclick='startGame("join")'>Dołącz</button>
         <button onclick='closePopup()'>Cancel</button>
     `
 }
@@ -67,38 +69,62 @@ function closePopup(){
     document.querySelector("#popup").innerHTML = ""
     document.querySelector("#darkScreen").style.display = "none"
 }
-function createGame(){
-    ws = new WebSocket("ws://localhost:8081")
+function startGame(x){
+    nickname = document.querySelector("#nickname").value
+    ws = new WebSocket("ws://185.150.132.76:8081")
     ws.onmessage = (msg)=>{
         let data = JSON.parse(msg.data)
-        /*switch(data.type){
+        switch(data.type){
             case "gameCreated":
                 clientId = data.playerId
                 gameId = data.gameId
+                document.querySelector("#players").innerHTML += `<li>${nickname}</li>`
+                clients[data.playerId] = {nickname: nickname, role: "host"}
+                document.querySelector("#gameCode").innerHTML = gameId
                 break
-        }*/
-        console.log(data)
-    }
-    ws.onopen = ()=>{
-        ws.send(JSON.stringify({type: "createGame", nickname: document.querySelector("#nickname").value , maxPlayers: document.querySelector("#players").value}))
-    }
-}
-function joinGame(){
-    ws = new WebSocket("ws://localhost:8081")
-    ws.onmessage = (msg)=>{
-        let data = JSON.parse(msg.data)
-        console.log(data)
-        switch(data.type){
             case "gameJoined":
+                clientId = data.playerId
+                gameId = data.gameId
+                clients = JSON.parse(JSON.stringify(data.players))
+                clients[data.playerId] = {nickname: nickname, role: "player"}
+                Object.keys(clients).forEach((key)=>{
+                    document.querySelector("#players").innerHTML += `<li>${clients[key].nickname}</li>`
+                })
+                document.querySelector("#gameCode").innerHTML = gameId
                 break
             case "gameNotFound":
                 // do something
                 ws.close()
                 break
+            case "newPlayer":
+                document.querySelector("#players").innerHTML += `<li>${data.nickname}</li>`
+                clients[data.playerId] = {nickname: data.nickname, role: data.role}
+                break
+            case "playerLeft":
+                document.querySelector("#players").innerHTML = ""
+                delete clients[data.playerId]
+                Object.keys(clients).forEach((key)=>{
+                    document.querySelector("#players").innerHTML += `<li>${clients[key].nickname}</li>`
+                })
+                break
         }
+        console.log(data)
     }
     ws.onopen = ()=>{
+        if (x == "create")
+            ws.send(JSON.stringify({type: "createGame", nickname: document.querySelector("#nickname").value , maxPlayers: document.querySelector("#players").value}))
+        else if (x == "join")
         ws.send(JSON.stringify({type: "joinGame", nickname: document.querySelector("#nickname").value, code: document.querySelector("#code").value}))
+        main.innerHTML = `
+            <div id="waitingRoom">
+                <h1>Waiting room</h1>
+                <div>Game code: <span id="gameCode"></span></div>
+                <ul id="players"></ul>
+            </div>
+        `
+    }
+    ws.onclose = ()=>{
+        menu()
     }
 }
 window.onload=()=>{

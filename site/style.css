@@ -80,3 +80,11 @@ table{
 td{
     padding: 5px;
 }
+#gameCode{
+    user-select: text;
+    display: inline-block;
+    padding: 5px;
+    background-color: gray;
+    color: white;
+    border-radius: 5px;
+}
