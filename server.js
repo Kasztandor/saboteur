@@ -71,7 +71,7 @@ wss.on('connection', function connection(ws) {
                         players[element] = {nickname: clients[element].nickname, playerId: clients[element].playerId, role: (games[gameId].host == element ? "host" : "player")}
                         clients[element].ws.send(JSON.stringify({type: "newPlayer", playerId: clientId, nickname: nickname, role: (games[gameId].host == clientId ? "host" : "player")}))
                     })
-                    ws.send(JSON.stringify({type: "gameJoined", playerId: clientId, players: players, role: "player"}))
+                    ws.send(JSON.stringify({type: "gameJoined", playerId: clientId, players: players, role: "player", gameId: gameId}))
                     games[data.code].players.push(clientId)
                 }
                 else{

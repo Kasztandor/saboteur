@@ -65,13 +65,21 @@ function joinGamePopup(){
         <button onclick='closePopup()'>Cancel</button>
     `
 }
+function endGamePopup(msg="Game has been closed by host."){
+    document.querySelector("#darkScreen").style.display = "block"
+    document.querySelector("#popup").innerHTML = `
+        <h1>Game ended!</h1>
+        ${msg}<br>
+        <button onclick='closePopup()'>Close</button>
+    `
+}
 function closePopup(){
     document.querySelector("#popup").innerHTML = ""
     document.querySelector("#darkScreen").style.display = "none"
 }
 function startGame(x){
     nickname = document.querySelector("#nickname").value
-    ws = new WebSocket("ws://185.150.132.76:8081")
+    ws = new WebSocket("ws://127.0.0.1:8081")
     ws.onmessage = (msg)=>{
         let data = JSON.parse(msg.data)
         switch(data.type){
@@ -107,6 +115,9 @@ function startGame(x){
                     document.querySelector("#players").innerHTML += `<li>${clients[key].nickname}</li>`
                 })
                 break
+            case "closeGame":
+                ws.close()
+                break
         }
         console.log(data)
     }
@@ -125,6 +136,7 @@ function startGame(x){
     }
     ws.onclose = ()=>{
         menu()
+        endGamePopup()
     }
 }
 window.onload=()=>{
