@@ -65,7 +65,7 @@ function joinGamePopup(){
         <button onclick='closePopup()'>Cancel</button>
     `
 }
-function endGamePopup(msg="Game has been closed by host."){
+function endGamePopup(msg="Game ended unexpectedly. Please try again."){
     document.querySelector("#darkScreen").style.display = "block"
     document.querySelector("#popup").innerHTML = `
         <h1>Game ended!</h1>
@@ -77,6 +77,11 @@ function closePopup(){
     document.querySelector("#popup").innerHTML = ""
     document.querySelector("#darkScreen").style.display = "none"
 }
+function closeGame(){
+    ws.onclose = ()=>{}
+    ws.close()
+    menu()
+}
 function startGame(x){
     nickname = document.querySelector("#nickname").value
     ws = new WebSocket("ws://127.0.0.1:8081")
@@ -86,9 +91,10 @@ function startGame(x){
             case "gameCreated":
                 clientId = data.playerId
                 gameId = data.gameId
-                document.querySelector("#players").innerHTML += `<li>${nickname}</li>`
+                document.querySelector("#players").innerHTML += `<li><i class="icon-crown"></i> ${nickname}</li>`
                 clients[data.playerId] = {nickname: nickname, role: "host"}
                 document.querySelector("#gameCode").innerHTML = gameId
+                document.querySelector("#gameCode").addEventListener("click", ()=>{navigator.clipboard.writeText(gameId)})
                 break
             case "gameJoined":
                 clientId = data.playerId
@@ -96,13 +102,9 @@ function startGame(x){
                 clients = JSON.parse(JSON.stringify(data.players))
                 clients[data.playerId] = {nickname: nickname, role: "player"}
                 Object.keys(clients).forEach((key)=>{
-                    document.querySelector("#players").innerHTML += `<li>${clients[key].nickname}</li>`
+                    document.querySelector("#players").innerHTML += `<li>${clients[key].role=="host"?'<i class="icon-crown"></i> ':""}${clients[key].nickname}</li>`
                 })
-                document.querySelector("#gameCode").innerHTML = gameId
-                break
-            case "gameNotFound":
-                // do something
-                ws.close()
+                document.querySelector("#gameCode").innerHTML = gameId+" <i class='icon-docs'></i>"
                 break
             case "newPlayer":
                 document.querySelector("#players").innerHTML += `<li>${data.nickname}</li>`
@@ -112,11 +114,17 @@ function startGame(x){
                 document.querySelector("#players").innerHTML = ""
                 delete clients[data.playerId]
                 Object.keys(clients).forEach((key)=>{
-                    document.querySelector("#players").innerHTML += `<li>${clients[key].nickname}</li>`
+                    document.querySelector("#players").innerHTML += `<li>${clients[key].role=="host"?'<i class="icon-crown"></i> ':""}${clients[key].nickname}</li>`
                 })
                 break
             case "closeGame":
+                ws.onclose = ()=>{}
+                menu()
+                endGamePopup(data.reason)
                 ws.close()
+                break
+            case "startGame":
+                main.innerHTML = "Gra"
                 break
         }
         console.log(data)
@@ -129,7 +137,9 @@ function startGame(x){
         main.innerHTML = `
             <div id="waitingRoom">
                 <h1>Waiting room</h1>
-                <div>Game code: <span id="gameCode"></span></div>
+                <div>
+                    Game code: <span id="gameCode"></span> <button onclick='closeGame()'><i class="icon-logout  "></i></button>
+                </div>
                 <ul id="players"></ul>
             </div>
         `

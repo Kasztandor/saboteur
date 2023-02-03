@@ -1,3 +1,5 @@
+@import url('fontello/css/fontello.css');
+
 body{
     background-color: #cc6600;
     color: #fff;
@@ -81,10 +83,14 @@ td{
     padding: 5px;
 }
 #gameCode{
-    user-select: text;
+    user-select: none;
     display: inline-block;
     padding: 5px;
     background-color: gray;
     color: white;
     border-radius: 5px;
+    cursor: pointer;
+}
+.coppied{
+    position: absolute;
 }
