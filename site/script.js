@@ -95,6 +95,7 @@ function startGame(x){
         let data = JSON.parse(msg.data)
         switch(data.type){
             case "gameCreated":
+                document.querySelector("main").classList.add("host")
                 clientId = data.playerId
                 gameId = data.gameId
                 document.querySelector("#players").innerHTML += `<li><i class="icon-crown"></i> ${nickname}</li>`
@@ -103,6 +104,7 @@ function startGame(x){
                 document.querySelector("#gameCode").addEventListener("click", ()=>{navigator.clipboard.writeText(gameId)})
                 break
             case "gameJoined":
+                document.querySelector("main").classList.remove("host")
                 clientId = data.playerId
                 gameId = data.gameId
                 clients = JSON.parse(JSON.stringify(data.players))
@@ -123,6 +125,7 @@ function startGame(x){
             case "newHost":
                 Object.keys(clients).forEach((key)=>{
                     clients[key].role = "player"
+                    document.querySelector("main").classList.add("host")
                 })
                 clients[data.playerId].role = "host"
                 reloadPlayers()
@@ -148,13 +151,14 @@ function startGame(x){
             <div id="waitingRoom">
                 <h1>Waiting room</h1>
                 <div>
-                    Game code: <span id="gameCode"></span> <button onclick='closeGame()'><i class="icon-logout  "></i></button>
+                    Game code: <span id="gameCode"></span> <button onclick='closeGame()'><i class="icon-logout  "></i></button> <button class="hostOnly" onclick='ws.send(JSON.stringify({"type":"startGame"}))'>Start game</button>
                 </div>
                 <ul id="players"></ul>
             </div>
         `
     }
     ws.onclose = ()=>{
+        document.querySelector("main").classList.remove("host")
         menu()
         endGamePopup()
     }

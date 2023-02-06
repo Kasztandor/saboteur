@@ -94,3 +94,9 @@ td{
 .coppied{
     position: absolute;
 }
+.hostOnly{
+    display: none;
+}
+.host .hostOnly{
+    display: initial !important;
+}
