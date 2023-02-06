@@ -82,6 +82,12 @@ function closeGame(){
     ws.close()
     menu()
 }
+function reloadPlayers(){
+    document.querySelector("#players").innerHTML = ""
+    Object.keys(clients).forEach((key)=>{
+        document.querySelector("#players").innerHTML += `<li>${clients[key].role=="host"?'<i class="icon-crown"></i> ':""}${clients[key].nickname}</li>`
+    })
+}
 function startGame(x){
     nickname = document.querySelector("#nickname").value
     ws = new WebSocket("ws://127.0.0.1:8081")
@@ -111,11 +117,15 @@ function startGame(x){
                 clients[data.playerId] = {nickname: data.nickname, role: data.role}
                 break
             case "playerLeft":
-                document.querySelector("#players").innerHTML = ""
                 delete clients[data.playerId]
+                reloadPlayers()
+                break
+            case "newHost":
                 Object.keys(clients).forEach((key)=>{
-                    document.querySelector("#players").innerHTML += `<li>${clients[key].role=="host"?'<i class="icon-crown"></i> ':""}${clients[key].nickname}</li>`
+                    clients[key].role = "player"
                 })
+                clients[data.playerId].role = "host"
+                reloadPlayers()
                 break
             case "closeGame":
                 ws.onclose = ()=>{}

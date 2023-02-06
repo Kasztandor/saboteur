@@ -32,51 +32,67 @@ function generateId(x){
 }
 
 wss.on('connection', function connection(ws) {
-    let nickname, clientId, gameId
+    let nickname, playerId, gameId
     ws.on("close",()=>{
-        if (clients.hasOwnProperty(clientId))
-            delete clients.clientId
+        if (clients.hasOwnProperty(playerId))
+            delete clients.playerId
         if (games.hasOwnProperty(gameId)){
-            games[gameId].players.splice(games[gameId].players.indexOf(clientId),1)
+            games[gameId].players.splice(games[gameId].players.indexOf(playerId),1)
             if (games[gameId].players.length == 0)
                 delete games[gameId]
             else{
-                games[gameId].players.forEach(element => {
-                    clients[element].ws.send(JSON.stringify({type: "playerLeft", playerId: clientId, role: games[gameId].host == clientId ? "host" : "player"}))
+                games[gameId].players.forEach(el => {
+                    clients[el].ws.send(JSON.stringify({type: "playerLeft", playerId: playerId}))
                 })
+                if (games[gameId].host == playerId){
+                    games[gameId].host = games[gameId].players[0]
+                    games[gameId].players.forEach(el=>{
+                        clients[el].ws.send(JSON.stringify({type: "newHost", playerId: games[gameId].host}))
+                    })
+                }
             }
             console.log(games)
         }
-        console.log("Client "+clientId+" disconnected")
+        console.log("Client "+playerId+" disconnected")
     })
+    ws.onopen = ()=>{}
     ws.on("message",(msg)=>{
         let data = JSON.parse(msg)
         switch(data.type){
             case "createGame":
                 nickname = data.nickname
-                clientId = generateId("client")
-                clients[clientId] = {ws: ws, nickname: nickname}
+                playerId = generateId("client")
+                clients[playerId] = {ws: ws, nickname: nickname}
                 gameId = generateId("game")
-                games[gameId] = {players: [clientId], maxPlayers: data.maxPlayers, host: clientId, status: "waitingRoom"}
-                ws.send(JSON.stringify({type: "gameCreated", gameId: gameId, playerId: clientId}))
+                games[gameId] = {players: [playerId], maxPlayers: data.maxPlayers, host: playerId, status: "waitingRoom"}
+                ws.send(JSON.stringify({type: "gameCreated", gameId: gameId, playerId: playerId}))
                 break
             case "joinGame":
                 if (games.hasOwnProperty(data.code)){
                     nickname = data.nickname
                     gameId = data.code
-                    clientId = generateId("client")
-                    clients[clientId] = {ws: ws, nickname: nickname}
+                    playerId = generateId("client")
+                    clients[playerId] = {ws: ws, nickname: nickname}
                     let players = {}
                     games[data.code].players.forEach(element => {
                         players[element] = {nickname: clients[element].nickname, playerId: clients[element].playerId, role: (games[gameId].host == element ? "host" : "player")}
-                        clients[element].ws.send(JSON.stringify({type: "newPlayer", playerId: clientId, nickname: nickname, role: (games[gameId].host == clientId ? "host" : "player")}))
+                        clients[element].ws.send(JSON.stringify({type: "newPlayer", playerId: playerId, nickname: nickname, role: (games[gameId].host == playerId ? "host" : "player")}))
                     })
-                    ws.send(JSON.stringify({type: "gameJoined", playerId: clientId, players: players, role: "player", gameId: gameId}))
-                    games[data.code].players.push(clientId)
+                    ws.send(JSON.stringify({type: "gameJoined", playerId: playerId, players: players, role: "player", gameId: gameId}))
+                    games[data.code].players.push(playerId)
                 }
                 else{
-                    ws.send(JSON.stringify({type: "gameNotFound"}))
+                    ws.send(JSON.stringify({type: "closeGame", reason: "Game not found."}))
                     ws.close()
+                }
+                break
+            case "startGame":
+                if (games[gameId].host == playerId){
+                    games[gameId].status = "inGame"
+                    games[gameId].players.forEach(element => {
+                        clients[element].ws.send(JSON.stringify({type: "gameStarted"}))
+                    })
+                    console.log(1)
                 }
                 break
         }
