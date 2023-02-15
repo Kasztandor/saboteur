@@ -10,6 +10,8 @@
         }
         #topBar{
             height: 10vh;
+            line-height: 10vh;
+            text-align: center;
             background-color: #000;
             color: #fff;
         }
@@ -61,11 +63,17 @@
             left: 50%;
             transform: translate(-50%, -50%);
         }
+        .outline{
+            outline: 5px solid green;
+            border: 1px solid green;
+        }
     </style>
 </head>
 <body>
     <main>
-        <div id="topBar"></div>
+        <div id="topBar">
+            Kas <b>Anderox</b> Adrian
+        </div>
         <div id="gameField">
             <table> <!-- 9x13 -->
                 <tr>
@@ -75,19 +83,19 @@
                     <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
                 </tr>
                 <tr>
-                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><img src="cards/hidden.png"></td><td></td><td></td>
                 </tr>
                 <tr>
                     <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
                 </tr>
                 <tr>
-                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><img src="cards/hidden.png"></td><td></td><td></td>
                 </tr>
                 <tr>
                     <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
                 </tr>
                 <tr>
-                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><img src="cards/hidden.png"></td><td></td><td></td>
                 </tr>
                 <tr>
                     <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
@@ -97,7 +105,12 @@
                 </tr>
             </table>
         </div>
-        <div id="cards"><div class="card"><img src="cards/TR.png" alt="TR"></div></div>
+        <div id="cards">
+            <div class="card"><img src="cards/TR.png"></div>
+            <div class="card"><img src="cards/TB.png"></div>
+            <div class="card"><img src="cards/TRB.png"></div>
+            <div class="card"><img src="cards/TR.png"></div>
+        </div>
     </main>
     <script>
         let drag
@@ -119,11 +132,21 @@
         })
         document.querySelectorAll("td").forEach(x => {
             x.addEventListener("dragover", (ev)=>{
-                console.log(ev)
-                ev.preventDefault()
+                if (drag !== null){
+                    ev.preventDefault()
+                    x.classList.add("outline")
+                }
+            })
+            x.addEventListener("dragleave", (ev)=>{
+                x.classList.remove("outline")
             })
             x.addEventListener("drop", (ev)=>{
+                x.classList.remove("outline")
+                let toRemove = drag.parentElement
                 x.appendChild(drag)
+                drag = null
+                toRemove.remove()
+                reloadDraggable()
             })
         })
     </script>
