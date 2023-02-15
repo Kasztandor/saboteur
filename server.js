@@ -70,6 +70,11 @@ wss.on('connection', function connection(ws) {
             case "joinGame":
                 if (games.hasOwnProperty(data.code)){
                     if (games[data.code].status == "waitingRoom"){
+                        if (games[data.code].players.length >= games[data.code].maxPlayers){
+                            ws.send(JSON.stringify({type: "closeGame", reason: "Game is full."}))
+                            ws.close()
+                            return
+                        }
                         nickname = data.nickname
                         gameId = data.code
                         playerId = generateId("client")
@@ -79,7 +84,7 @@ wss.on('connection', function connection(ws) {
                             players[element] = {nickname: clients[element].nickname, playerId: clients[element].playerId, role: (games[gameId].host == element ? "host" : "player")}
                             clients[element].ws.send(JSON.stringify({type: "newPlayer", playerId: playerId, nickname: nickname, role: (games[gameId].host == playerId ? "host" : "player")}))
                         })
-                        ws.send(JSON.stringify({type: "gameJoined", playerId: playerId, players: players, role: "player", gameId: gameId}))
+                        ws.send(JSON.stringify({type: "gameJoined", playerId: playerId, players: players, role: "player", gameId: gameId, maxPlayers: games[data.code].maxPlayers}))
                         games[data.code].players.push(playerId)
                     }
                     else{

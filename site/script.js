@@ -3,6 +3,7 @@ let clientId = null
 let gameId = null
 let nickname = null
 let ws = null
+let maxPlayers = null
 let clients = {}
 
 function menu(){
@@ -102,25 +103,30 @@ function startGame(x){
                 clients[data.playerId] = {nickname: nickname, role: "host"}
                 document.querySelector("#gameCode").innerHTML = gameId
                 document.querySelector("#gameCode").addEventListener("click", ()=>{navigator.clipboard.writeText(gameId)})
+                document.querySelector("#playersCount").innerHTML = Object.keys(clients).length+"/"+maxPlayers
                 break
             case "gameJoined":
                 document.querySelector("main").classList.remove("host")
                 clientId = data.playerId
                 gameId = data.gameId
+                maxPlayers = data.maxPlayers
                 clients = JSON.parse(JSON.stringify(data.players))
                 clients[data.playerId] = {nickname: nickname, role: "player"}
                 Object.keys(clients).forEach((key)=>{
                     document.querySelector("#players").innerHTML += `<li>${clients[key].role=="host"?'<i class="icon-crown"></i> ':""}${clients[key].nickname}</li>`
                 })
                 document.querySelector("#gameCode").innerHTML = gameId+" <i class='icon-docs'></i>"
+                document.querySelector("#playersCount").innerHTML = Object.keys(clients).length+"/"+maxPlayers
                 break
             case "newPlayer":
                 document.querySelector("#players").innerHTML += `<li>${data.nickname}</li>`
                 clients[data.playerId] = {nickname: data.nickname, role: data.role}
+                document.querySelector("#playersCount").innerHTML = Object.keys(clients).length+"/"+maxPlayers
                 break
             case "playerLeft":
                 delete clients[data.playerId]
                 reloadPlayers()
+                document.querySelector("#playersCount").innerHTML = Object.keys(clients).length+"/"+maxPlayers
                 break
             case "newHost":
                 Object.keys(clients).forEach((key)=>{
@@ -140,18 +146,21 @@ function startGame(x){
                 main.innerHTML = "Gra"
                 break
         }
+        console.log("Received:")
         console.log(data)
     }
     ws.onopen = ()=>{
-        if (x == "create")
+        if (x == "create"){
             ws.send(JSON.stringify({type: "createGame", nickname: document.querySelector("#nickname").value , maxPlayers: document.querySelector("#players").value}))
+            maxPlayers = document.querySelector("#players").value
+        }
         else if (x == "join")
-        ws.send(JSON.stringify({type: "joinGame", nickname: document.querySelector("#nickname").value, code: document.querySelector("#code").value}))
+            ws.send(JSON.stringify({type: "joinGame", nickname: document.querySelector("#nickname").value, code: document.querySelector("#code").value}))
         main.innerHTML = `
             <div id="waitingRoom">
                 <h1>Waiting room</h1>
                 <div>
-                    Game code: <span id="gameCode"></span> <button onclick='closeGame()'><i class="icon-logout  "></i></button> <button class="hostOnly" onclick='ws.send(JSON.stringify({"type":"startGame"}))'>Start game</button>
+                    Game code: <span id="gameCode"></span> <button onclick='closeGame()'><i class="icon-logout  "></i></button> <button class="hostOnly" onclick='ws.send(JSON.stringify({"type":"startGame"}))'>Start game</button> Players: <span id="playersCount"></span>
                 </div>
                 <ul id="players"></ul>
             </div>

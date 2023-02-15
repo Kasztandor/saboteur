@@ -3,13 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <title>Game Test</title>
+    <link rel="stylesheet" href="style.css">
     <style>
+        :root{
+            --x: calc((90vh / 10) - 5px);
+        }
+        #topBar{
+            height: 10vh;
+            background-color: #000;
+            color: #fff;
+        }
+        #gameField{
+            height: calc(var(--x) * 9 + 30px);
+            position: relative;
+        }
+        #cards{
+            height: var(--x);
+            padding: 10px 0;
+            background-color: red;
+            color: wheat;
+            text-align: center;
+        }
+        #cards div{
+            display: inline-block;
+            width: calc(var(--x) * 0.8);
+            height: var(--x);
+        }
+        #cards div img{
+            width: 100%;
+            height: 100%;
+        }
+        table{
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-collapse: collapse;
+            margin: 0;
+            padding: 0;
+        }
+        table tr td{
+            width: calc(var(--x) * 0.8);
+            min-width: calc(var(--x) * 0.8);
+            height: var(--x);
+            border: none;
+            border: 1px solid black;
+            padding: 0;
+            margin: 0;
+            position: relative;
+        }
+        table tr td img{
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
     </style>
 </head>
 <body>
-    <script></script>
     <main>
-        
+        <div id="topBar"></div>
+        <div id="gameField">
+            <table> <!-- 9x13 -->
+                <tr>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+                <tr>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+                <tr>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+                <tr>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+                <tr>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+                <tr>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+                <tr>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+                <tr>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+                <tr>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+            </table>
+        </div>
+        <div id="cards"><div class="card"><img src="cards/TR.png" alt="TR"></div></div>
     </main>
+    <script>
+        let drag
+        function reloadDraggable(){
+            document.querySelectorAll(".card").forEach(x => {
+                if (x.parentElement.id == "cards")
+                    x.draggable = "true"
+                else
+                    x.draggable = "false"
+            })
+        }
+        function newCard(type){
+            document.querySelector("#cards").innerHTML += `<div class="card" draggable="true" ondragstart="dragstart(event)"><img src="cards/${type}.png" alt="${type}"></div>`
+        }
+        document.querySelectorAll(".card").forEach(x => {
+            x.addEventListener("dragstart", (ev)=>{
+                drag = ev.target
+            })
+        })
+        document.querySelectorAll("td").forEach(x => {
+            x.addEventListener("dragover", (ev)=>{
+                console.log(ev)
+                ev.preventDefault()
+            })
+            x.addEventListener("drop", (ev)=>{
+                x.appendChild(drag)
+            })
+        })
+    </script>
 </body>
 </html>
