@@ -89,7 +89,7 @@
                     <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
                 </tr>
                 <tr>
-                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><img src="cards/hidden.png"></td><td></td><td></td>
+                    <td></td><td></td><td><img src="cards/enter.png"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><img src="cards/hidden.png"></td><td></td><td></td>
                 </tr>
                 <tr>
                     <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
@@ -114,12 +114,20 @@
     </main>
     <script>
         let drag
+        function rotateCard(el){
+            el.
+        }
         function reloadDraggable(){
             document.querySelectorAll(".card").forEach(x => {
-                if (x.parentElement.id == "cards")
+                if (x.parentElement.id == "cards"){
                     x.draggable = "true"
+                    x.onclick = (ev)=>{
+                        rotateCard(ev.target)
+                    }
+                }
                 else
                     x.draggable = "false"
+                    x.onclick = null
             })
         }
         function newCard(type){
