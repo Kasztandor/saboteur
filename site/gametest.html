@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Game Test</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="favicon.png">
     <style>
         :root{
             --x: calc((90vh / 10) - 5px);
@@ -106,16 +107,28 @@
             </table>
         </div>
         <div id="cards">
-            <div class="card"><img src="cards/TR.png"></div>
-            <div class="card"><img src="cards/TB.png"></div>
-            <div class="card"><img src="cards/TRB.png"></div>
-            <div class="card"><img src="cards/TR.png"></div>
+            <div class="card"><img src="cards/TR.png" alt="TR"></div>
+            <div class="card"><img src="cards/TB.png" alt="TB"></div>
+            <div class="card"><img src="cards/TRB.png" alt="TRB"></div>
+            <div class="card"><img src="cards/TR.png" alt="TR"></div>
         </div>
     </main>
     <script>
-        let drag
+        let drag = null
         function rotateCard(el){
-            el.
+            let x = el.alt
+            let y = ""
+            for (var i = 0; i < x.length; i++) {
+                y += x.charAt(i).replace("T", "b").replace("B", "t").replace("L", "r").replace("R", "l").toUpperCase()
+            }
+            let alt = ""
+            y.includes("T")?alt+="T":""
+            y.includes("R")?alt+="R":""
+            y.includes("B")?alt+="B":""
+            y.includes("L")?alt+="L":""
+            let newSrc = "cards/" + alt + ".png"
+            el.src = newSrc
+            el.alt = alt
         }
         function reloadDraggable(){
             document.querySelectorAll(".card").forEach(x => {
@@ -124,20 +137,23 @@
                     x.onclick = (ev)=>{
                         rotateCard(ev.target)
                     }
+                    x.addEventListener("dragstart", (ev)=>{
+                        drag = ev.target
+                    })
+                    x.addEventListener("dragend", (ev)=>{
+                        drag = null
+                    })
                 }
-                else
+                else{
                     x.draggable = "false"
                     x.onclick = null
+                }
             })
         }
         function newCard(type){
-            document.querySelector("#cards").innerHTML += `<div class="card" draggable="true" ondragstart="dragstart(event)"><img src="cards/${type}.png" alt="${type}"></div>`
+            document.querySelector("#cards").innerHTML += `<div class="card"><img src="cards/${type}.png" alt="${type}"></div>`
+            reloadDraggable()
         }
-        document.querySelectorAll(".card").forEach(x => {
-            x.addEventListener("dragstart", (ev)=>{
-                drag = ev.target
-            })
-        })
         document.querySelectorAll("td").forEach(x => {
             x.addEventListener("dragover", (ev)=>{
                 if (drag !== null){
