@@ -15,6 +15,25 @@
             text-align: center;
             background-color: #000;
             color: #fff;
+            display: flex;
+        }
+        #topBar div{
+            width: 20%;
+        }
+        #topBar div:nth-child(2){
+            width: 60%;
+        }
+        #role span:nth-child(1){
+            display: none;
+        }
+        #role:hover span:nth-child(1){
+            display: inline;
+        }
+        #role span:nth-child(2){
+            display: inline;
+        }
+        #role:hover span:nth-child(2){
+            display: none;
         }
         #gameField{
             height: calc(var(--x) * 9 + 30px);
@@ -68,12 +87,18 @@
             outline: 5px solid green;
             border: 1px solid green;
         }
+        .red{
+            color: red;
+        }
+        .green{
+            color: green;
+        }
     </style>
 </head>
 <body>
     <main>
         <div id="topBar">
-            Kas <b>Anderox</b> Adrian
+            <div id="role"><span class="red">Sabotarzysta</span><span>Hover me</span></div><div id="players">Kasztandor <b>Anderox</b> Adrian</div><div id="idk"></div>
         </div>
         <div id="gameField">
             <table> <!-- 9x13 -->
@@ -115,6 +140,14 @@
     </main>
     <script>
         let drag = null
+        function reverseDirection(x){
+            let ret
+            x=="T"?ret="B":""
+            x=="B"?ret="T":""
+            x=="L"?ret="R":""
+            x=="R"?ret="L":""
+            return ret
+        }
         function rotateCard(el){
             let x = el.alt
             let y = ""
@@ -150,13 +183,36 @@
                 }
             })
         }
+        function reloadDroppable(x = 3, y = 5){
+            if (x > 0 && x < 14 && y > 0 && y < 10){
+                let piece = document.querySelector(`table tr:nth-child(${y}) td:nth-child(${x})`)
+                console.log(piece)
+                piece.classList.add("allowDrop")
+                if (piece.childElementCount == 0){
+                    piece.classList.add("outline")
+                }
+                else{
+                    let dict = {
+                        "T": [0,-1],
+                        "R": [1,0],
+                        "B": [0,1],
+                        "L": [-1,0]
+                    }
+                    ["T","R","B","L"].forEach(j=>{
+                        if (x+j[0] > 0 && x+j[0] < 14 && y+j[1] > 0 && y+j[1] < 10){
+                            let pieceInside = document.querySelector(`table tr:nth-child(${y+j[1]}) td:nth-child(${x+j[0]})`)
+                        }
+                    })
+                }
+            }
+        }
         function newCard(type){
             document.querySelector("#cards").innerHTML += `<div class="card"><img src="cards/${type}.png" alt="${type}"></div>`
             reloadDraggable()
         }
         document.querySelectorAll("td").forEach(x => {
             x.addEventListener("dragover", (ev)=>{
-                if (drag !== null){
+                if (drag !== null && x.childElementCount == 0 /*&& x.classList.contains("allowDrop")*/){
                     ev.preventDefault()
                     x.classList.add("outline")
                 }
@@ -173,6 +229,8 @@
                 reloadDraggable()
             })
         })
+        reloadDraggable()
+        reloadDroppable()
     </script>
 </body>
 </html>
