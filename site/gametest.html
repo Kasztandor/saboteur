@@ -16,6 +16,7 @@
             background-color: #000;
             color: #fff;
             display: flex;
+            font-size: 2.5vh;
         }
         #topBar div{
             width: 20%;
@@ -34,6 +35,14 @@
         }
         #role:hover span:nth-child(2){
             display: none;
+        }
+        #players{
+            
+        }
+        #players img{
+            display: inline;
+            vertical-align: middle;
+            height: 3vh;
         }
         #gameField{
             height: calc(var(--x) * 9 + 30px);
@@ -98,7 +107,7 @@
 <body>
     <main>
         <div id="topBar">
-            <div id="role"><span class="red">Sabotarzysta</span><span>Hover me</span></div><div id="players">Kasztandor <b>Anderox</b> Adrian</div><div id="idk"></div>
+            <div id="role"><span class="red">Sabotarzysta</span><span>Hover me</span></div><div id="players">Kasztandor <b>Anderox</b> Adrian <img src="icons/block.png"></div><div id="idk"></div>
         </div>
         <div id="gameField">
             <table> <!-- 9x13 -->
@@ -152,7 +161,7 @@
             let x = el.alt
             let y = ""
             for (var i = 0; i < x.length; i++) {
-                y += x.charAt(i).replace("T", "b").replace("B", "t").replace("L", "r").replace("R", "l").toUpperCase()
+                y += reverseDirection(x.charAt(i))
             }
             let alt = ""
             y.includes("T")?alt+="T":""
@@ -162,6 +171,9 @@
             let newSrc = "cards/" + alt + ".png"
             el.src = newSrc
             el.alt = alt
+        }
+        function updateCards(){
+
         }
         function reloadDraggable(){
             document.querySelectorAll(".card").forEach(x => {
