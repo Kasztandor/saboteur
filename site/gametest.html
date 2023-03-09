@@ -1,248 +1,90 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <title>Game Test</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="favicon.png">
-    <style>
-        :root{
-            --x: calc((90vh / 10) - 5px);
-        }
-        #topBar{
-            height: 10vh;
-            line-height: 10vh;
-            text-align: center;
-            background-color: #000;
-            color: #fff;
-            display: flex;
-            font-size: 2.5vh;
-        }
-        #topBar div{
-            width: 20%;
-        }
-        #topBar div:nth-child(2){
-            width: 60%;
-        }
-        #role span:nth-child(1){
-            display: none;
-        }
-        #role:hover span:nth-child(1){
-            display: inline;
-        }
-        #role span:nth-child(2){
-            display: inline;
-        }
-        #role:hover span:nth-child(2){
-            display: none;
-        }
-        #players{
-            
-        }
-        #players img{
-            display: inline;
-            vertical-align: middle;
-            height: 3vh;
-        }
-        #gameField{
-            height: calc(var(--x) * 9 + 30px);
-            position: relative;
-        }
-        #cards{
-            height: var(--x);
-            padding: 10px 0;
-            background-color: red;
-            color: wheat;
-            text-align: center;
-        }
-        #cards div{
-            display: inline-block;
-            width: calc(var(--x) * 0.8);
-            height: var(--x);
-        }
-        #cards div img{
-            width: 100%;
-            height: 100%;
-        }
-        table{
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            border-collapse: collapse;
-            margin: 0;
-            padding: 0;
-        }
-        table tr td{
-            width: calc(var(--x) * 0.8);
-            min-width: calc(var(--x) * 0.8);
-            height: var(--x);
-            border: none;
-            border: 1px solid black;
-            padding: 0;
-            margin: 0;
-            position: relative;
-        }
-        table tr td img{
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-        .outline{
-            outline: 5px solid green;
-            border: 1px solid green;
-        }
-        .red{
-            color: red;
-        }
-        .green{
-            color: green;
-        }
-    </style>
-</head>
-<body>
-    <main>
-        <div id="topBar">
-            <div id="role"><span class="red">Sabotarzysta</span><span>Hover me</span></div><div id="players">Kasztandor <b>Anderox</b> Adrian <img src="icons/block.png"></div><div id="idk"></div>
-        </div>
-        <div id="gameField">
-            <table> <!-- 9x13 -->
-                <tr>
-                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                </tr>
-                <tr>
-                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                </tr>
-                <tr>
-                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><img src="cards/hidden.png"></td><td></td><td></td>
-                </tr>
-                <tr>
-                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                </tr>
-                <tr>
-                    <td></td><td></td><td><img src="cards/enter.png"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><img src="cards/hidden.png"></td><td></td><td></td>
-                </tr>
-                <tr>
-                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                </tr>
-                <tr>
-                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><img src="cards/hidden.png"></td><td></td><td></td>
-                </tr>
-                <tr>
-                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                </tr>
-                <tr>
-                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                </tr>
-            </table>
-        </div>
-        <div id="cards">
-            <div class="card"><img src="cards/TR.png" alt="TR"></div>
-            <div class="card"><img src="cards/TB.png" alt="TB"></div>
-            <div class="card"><img src="cards/TRB.png" alt="TRB"></div>
-            <div class="card"><img src="cards/TR.png" alt="TR"></div>
-        </div>
-    </main>
-    <script>
-        let drag = null
-        function reverseDirection(x){
-            let ret
-            x=="T"?ret="B":""
-            x=="B"?ret="T":""
-            x=="L"?ret="R":""
-            x=="R"?ret="L":""
-            return ret
-        }
-        function rotateCard(el){
-            let x = el.alt
-            let y = ""
-            for (var i = 0; i < x.length; i++) {
-                y += reverseDirection(x.charAt(i))
+    <head>
+        <title>Saboteur</title>
+        <meta charset="utf-8">
+        <style>
+            html, body{
+                margin: 0;
+                padding: 0;
+                height: 100%;
             }
-            let alt = ""
-            y.includes("T")?alt+="T":""
-            y.includes("R")?alt+="R":""
-            y.includes("B")?alt+="B":""
-            y.includes("L")?alt+="L":""
-            let newSrc = "cards/" + alt + ".png"
-            el.src = newSrc
-            el.alt = alt
-        }
-        function updateCards(){
-
-        }
-        function reloadDraggable(){
-            document.querySelectorAll(".card").forEach(x => {
-                if (x.parentElement.id == "cards"){
-                    x.draggable = "true"
-                    x.onclick = (ev)=>{
-                        rotateCard(ev.target)
-                    }
-                    x.addEventListener("dragstart", (ev)=>{
-                        drag = ev.target
-                    })
-                    x.addEventListener("dragend", (ev)=>{
-                        drag = null
-                    })
-                }
-                else{
-                    x.draggable = "false"
-                    x.onclick = null
-                }
-            })
-        }
-        function reloadDroppable(x = 3, y = 5){
-            if (x > 0 && x < 14 && y > 0 && y < 10){
-                let piece = document.querySelector(`table tr:nth-child(${y}) td:nth-child(${x})`)
-                console.log(piece)
-                piece.classList.add("allowDrop")
-                if (piece.childElementCount == 0){
-                    piece.classList.add("outline")
-                }
-                else{
-                    let dict = {
-                        "T": [0,-1],
-                        "R": [1,0],
-                        "B": [0,1],
-                        "L": [-1,0]
-                    }
-                    ["T","R","B","L"].forEach(j=>{
-                        if (x+j[0] > 0 && x+j[0] < 14 && y+j[1] > 0 && y+j[1] < 10){
-                            let pieceInside = document.querySelector(`table tr:nth-child(${y+j[1]}) td:nth-child(${x+j[0]})`)
-                        }
-                    })
+            #topbar{
+                display: flex;
+            }
+            #topbar, #bottombar{
+                height: 10vh;
+                background-color: #000;
+                color: white;
+            }
+            #left, #center, #rigth{
+                width: 20%;
+                background-color: #000;
+            }
+            #center{
+                width: 60%;
+            }
+            #game{
+                height: 80vh;
+                background-color: orange;
+                position: relative;
+                overflow: hidden;
+            }
+            .card{ /* 240x300 */
+                --xShift: 0;
+                --yShift: 0;
+                --height: 90px;
+                --width: calc(var(--height) * 0.8);
+                background-color: gray;
+                height: var(--height);
+                width: var(--width);
+                position: absolute;
+                left: calc(50% + var(--xShift)*var(--width) - var(--x) * 1px);
+                top: calc(50% - var(--yShift)*var(--height) - var(--y) * 1px);
+                transform: translate(-50%, -50%);
+            }
+            .card img{
+                width: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="topbar">
+            <div id="left"></div>
+            <div id="center"></div>
+            <div id="rigth"></div>
+        </div>
+        <div id="game" style="--x: 0; --y: 0;">
+            <div class="card" style="--xShift: 0; --yShift: 0;">
+                <img src="cards/enter.png" alt="enter">
+            </div>
+        </div>
+        <div id="bottombar"></div>
+        <script>
+            let moving = false
+            let x=0, xx=0, xxx = 0
+            let y = 0, yy = 0, yyy = 0
+            document.onmousemove = function(e){
+                xx = e.clientX
+                yy = e.clientY
+                if(moving){
+                    x += xxx - xx
+                    y += yyy - yy
+                    xxx = xx
+                    yyy = yy
+                    document.getElementById("game").style.setProperty("--x", x);
+                    document.getElementById("game").style.setProperty("--y", y);
                 }
             }
-        }
-        function newCard(type){
-            document.querySelector("#cards").innerHTML += `<div class="card"><img src="cards/${type}.png" alt="${type}"></div>`
-            reloadDraggable()
-        }
-        document.querySelectorAll("td").forEach(x => {
-            x.addEventListener("dragover", (ev)=>{
-                if (drag !== null && x.childElementCount == 0 /*&& x.classList.contains("allowDrop")*/){
-                    ev.preventDefault()
-                    x.classList.add("outline")
-                }
-            })
-            x.addEventListener("dragleave", (ev)=>{
-                x.classList.remove("outline")
-            })
-            x.addEventListener("drop", (ev)=>{
-                x.classList.remove("outline")
-                let toRemove = drag.parentElement
-                x.appendChild(drag)
-                drag = null
-                toRemove.remove()
-                reloadDraggable()
-            })
-        })
-        reloadDraggable()
-        reloadDroppable()
-    </script>
-</body>
+            document.querySelector("#game").onpointerdown = function(e){
+                moving = true;
+                xxx = e.clientX
+                yyy = e.clientY
+                document.querySelector("#center").innerHTML = xx + " " + yy
+            }
+            document.onpointerup = function(e){
+                moving = false;
+            }
+        </script>
+    </body>
 </html>
