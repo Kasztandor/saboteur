@@ -8,6 +8,9 @@
                 margin: 0;
                 padding: 0;
                 height: 100%;
+                text-align: center;
+                --mouseX: -1000;
+                --mouseY: -1000;
             }
             #topbar{
                 display: flex;
@@ -33,9 +36,9 @@
             .card{ /* 240x300 */
                 --xShift: 0;
                 --yShift: 0;
-                --height: 90px;
+                --height: calc(var(--cardHeight) * 1px); 
                 --width: calc(var(--height) * 0.8);
-                background-color: gray;
+                background-color: #3f3f3f;
                 height: var(--height);
                 width: var(--width);
                 position: absolute;
@@ -46,24 +49,64 @@
             .card img{
                 width: 100%;
             }
+            img{
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -o-user-select: none;
+                user-select: none;
+            }
+            #circle{
+                --circleSize: 120px;
+                position: absolute;
+                left: calc(var(--mouseX) * 1px - var(--circleSize) / 2);
+                top: calc(var(--mouseY) * 1px - var(--circleSize) / 2 - 10vh);
+                width: var(--circleSize);
+                height: var(--circleSize);
+                border-radius: 50%;
+                border: 1px solid black;
+            }
+            .barH, .barV{
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 2px;
+                height: 2px; 
+                background-color: white;
+            }
+            .barH{
+                height: 100%;
+                left: calc(50vw + var(--cardHeight)*0.4px*var(--factor) + var(--cardX)*var(--cardHeight)*0.8px - var(--x)*1px);
+            }
+            .barV{
+                width: 100%;
+                top: calc(40vh + var(--cardHeight)*0.5px*var(--factor) - var(--cardY)*var(--cardHeight)*-1px - var(--y)*1px);
+            }
         </style>
     </head>
-    <body>
+    <body style="--x: 0; --y: 0;">
         <div id="topbar">
             <div id="left"></div>
             <div id="center"></div>
             <div id="rigth"></div>
         </div>
-        <div id="game" style="--x: 0; --y: 0;">
+        <div id="game">
             <div class="card" style="--xShift: 0; --yShift: 0;">
                 <img src="cards/enter.png" alt="enter">
             </div>
+            <div id="circle"></div>
+            <div class="barH" style="--factor: -1;"></div>
+            <div class="barH" style="--factor: 1;"></div>
+            <div class="barV" style="--factor: -1;"></div>
+            <div class="barV" style="--factor: 1;"></div>
         </div>
         <div id="bottombar"></div>
         <script>
             let moving = false
-            let x=0, xx=0, xxx = 0
-            let y = 0, yy = 0, yyy = 0
+            let cardHeight = 90
+            document.body.style.setProperty("--cardHeight", cardHeight)
+            let x=0, xx=0, xxx=0, cardPosX=0
+            let y=0, yy=0, yyy=0, cardPosY=0
             document.onmousemove = function(e){
                 xx = e.clientX
                 yy = e.clientY
@@ -72,15 +115,20 @@
                     y += yyy - yy
                     xxx = xx
                     yyy = yy
-                    document.getElementById("game").style.setProperty("--x", x);
-                    document.getElementById("game").style.setProperty("--y", y);
+                    document.body.style.setProperty("--x", x)
+                    document.body.style.setProperty("--y", y)
                 }
+                document.body.style.setProperty("--mouseX", xx)
+                document.body.style.setProperty("--mouseY", yy)
+                cardPosX = Math.round((xx - window.innerWidth / 2) / cardHeight)
+                cardPosY = Math.round((yy - window.innerHeight / 2) / cardHeight)
+                document.body.style.setProperty("--cardX", cardPosX)
+                document.body.style.setProperty("--cardY", cardPosY)
             }
             document.querySelector("#game").onpointerdown = function(e){
                 moving = true;
                 xxx = e.clientX
                 yyy = e.clientY
-                document.querySelector("#center").innerHTML = xx + " " + yy
             }
             document.onpointerup = function(e){
                 moving = false;
