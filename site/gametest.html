@@ -91,7 +91,10 @@
             <div id="rigth"></div>
         </div>
         <div id="game">
-            <div class="card" style="--xShift: 0; --yShift: 0;">
+            <div class="card" style="--xShift: -4; --yShift: 0;">
+                <img src="cards/enter.png" alt="enter">
+            </div>
+            <div class="card" style="--xShift: 4; --yShift: 0;">
                 <img src="cards/enter.png" alt="enter">
             </div>
             <div id="circle"></div>
@@ -104,9 +107,10 @@
         <script>
             let moving = false
             let cardHeight = 90
+            let cardWidth = cardHeight*.8
             document.body.style.setProperty("--cardHeight", cardHeight)
-            let x=0, xx=0, xxx=0, cardPosX=0
-            let y=0, yy=0, yyy=0, cardPosY=0
+            let x=0, xx=0, xxx=0, cardPosX=0, fixedX = 0
+            let y=0, yy=0, yyy=0, cardPosY=0, fixedY = 0
             document.onmousemove = function(e){
                 xx = e.clientX
                 yy = e.clientY
@@ -120,18 +124,19 @@
                 }
                 document.body.style.setProperty("--mouseX", xx)
                 document.body.style.setProperty("--mouseY", yy)
-                cardPosX = Math.round((xx - window.innerWidth / 2) / cardHeight)
-                cardPosY = Math.round((yy - window.innerHeight / 2) / cardHeight)
+                cardPosX = Math.round((xx + x - window.innerWidth/2) / cardWidth)
+                cardPosY = Math.round((yy + y - window.innerHeight/2) / cardHeight)
                 document.body.style.setProperty("--cardX", cardPosX)
                 document.body.style.setProperty("--cardY", cardPosY)
+                document.querySelector("#center").innerHTML = cardPosX+" "+cardPosY
             }
             document.querySelector("#game").onpointerdown = function(e){
-                moving = true;
+                moving = true
                 xxx = e.clientX
                 yyy = e.clientY
             }
             document.onpointerup = function(e){
-                moving = false;
+                moving = false
             }
         </script>
     </body>
