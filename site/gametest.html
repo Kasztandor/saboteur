@@ -57,14 +57,16 @@
                 user-select: none;
             }
             #circle{
-                --circleSize: 120px;
+                --circleSize: calc(var(--cardHeight) * 2px);
+                --circleLeft: calc(var(--mouseX) * 1px - var(--circleSize) / 2);
+                --circleTop: calc(var(--mouseY) * 1px - var(--circleSize) / 2 - 10vh);
                 position: absolute;
-                left: calc(var(--mouseX) * 1px - var(--circleSize) / 2);
-                top: calc(var(--mouseY) * 1px - var(--circleSize) / 2 - 10vh);
+                left: var(--circleLeft);
+                top: var(--circleTop);
                 width: var(--circleSize);
                 height: var(--circleSize);
                 border-radius: 50%;
-                border: 1px solid black;
+                overflow: hidden;
             }
             .barH, .barV{
                 position: absolute;
@@ -72,15 +74,17 @@
                 left: 0;
                 width: 2px;
                 height: 2px; 
-                background-color: white;
+                background: white;
             }
             .barH{
                 height: 100%;
-                left: calc(50vw + var(--cardHeight)*0.4px*var(--factor) + var(--cardX)*var(--cardHeight)*0.8px - var(--x)*1px);
+                left: calc((50vw + var(--cardHeight)*0.4px*var(--factor) + var(--cardX)*var(--cardHeight)*0.8px - var(--x)*1px) - var(--circleLeft));
+                transform: translate(-50%, 0);
             }
             .barV{
                 width: 100%;
-                top: calc(40vh + var(--cardHeight)*0.5px*var(--factor) - var(--cardY)*var(--cardHeight)*-1px - var(--y)*1px);
+                top: calc(40vh + var(--cardHeight)*0.5px*var(--factor) - var(--cardY)*var(--cardHeight)*-1px - var(--y)*1px - var(--circleTop));
+                transform: translate(0, -50%);
             }
         </style>
     </head>
@@ -103,11 +107,16 @@
             <div class="card" style="--xShift: 4; --yShift: -2;">
                 <img src="cards/hidden.png" alt="enter">
             </div>
-            <div id="circle"></div>
-            <div class="barH" style="--factor: -1;"></div>
-            <div class="barH" style="--factor: 1;"></div>
-            <div class="barV" style="--factor: -1;"></div>
-            <div class="barV" style="--factor: 1;"></div>
+            <div id="circle">
+                <div class="barH" style="--factor: -3;"></div>
+                <div class="barV" style="--factor: -3;"></div>
+                <div class="barH" style="--factor: -1;"></div>
+                <div class="barV" style="--factor: -1;"></div>
+                <div class="barH" style="--factor: 1;"></div>
+                <div class="barV" style="--factor: 1;"></div>
+                <div class="barH" style="--factor: 3;"></div>
+                <div class="barV" style="--factor: 3;"></div>
+            </div>
         </div>
         <div id="bottombar"></div>
         <script>
@@ -115,8 +124,18 @@
             let cardHeight = 90
             let cardWidth = cardHeight*.8
             document.body.style.setProperty("--cardHeight", cardHeight)
-            let x=0, xx=0, xxx=0, cardPosX=0, fixedX = 0
-            let y=0, yy=0, yyy=0, cardPosY=0, fixedY = 0
+            let x=0, xx=0, xxx=0, cardPosX=0
+            let y=0, yy=0, yyy=0, cardPosY=0
+            function updateValues(){
+                document.body.style.setProperty("--x", x)
+                document.body.style.setProperty("--y", y)
+                document.body.style.setProperty("--mouseX", xx)
+                document.body.style.setProperty("--mouseY", yy)
+                cardPosX = Math.round((xx + x - window.innerWidth/2) / cardWidth)
+                cardPosY = Math.round((yy + y - window.innerHeight/2) / cardHeight)
+                document.body.style.setProperty("--cardX", cardPosX)
+                document.body.style.setProperty("--cardY", cardPosY)
+            }
             document.onmousemove = function(e){
                 xx = e.clientX
                 yy = e.clientY
@@ -125,16 +144,8 @@
                     y += yyy - yy
                     xxx = xx
                     yyy = yy
-                    document.body.style.setProperty("--x", x)
-                    document.body.style.setProperty("--y", y)
                 }
-                document.body.style.setProperty("--mouseX", xx)
-                document.body.style.setProperty("--mouseY", yy)
-                cardPosX = Math.round((xx + x - window.innerWidth/2) / cardWidth)
-                cardPosY = Math.round((yy + y - window.innerHeight/2) / cardHeight)
-                document.body.style.setProperty("--cardX", cardPosX)
-                document.body.style.setProperty("--cardY", cardPosY)
-                document.querySelector("#center").innerHTML = cardPosX+" "+cardPosY
+                updateValues()
             }
             document.querySelector("#game").onpointerdown = function(e){
                 moving = true
@@ -144,9 +155,9 @@
             document.onpointerup = function(e){
                 moving = false
             }
-            //change size of cards on scroll
-            document.onwheel = function(e){
+            document.querySelector("#game").onwheel = function(e){
                 if(e.deltaY > 0){
+                    if (cardHeight <= 20) return
                     cardHeight -= 5
                     cardWidth = cardHeight*.8
                 }else{
@@ -154,6 +165,7 @@
                     cardWidth = cardHeight*.8
                 }
                 document.body.style.setProperty("--cardHeight", cardHeight)
+                updateValues()
             }
         </script>
     </body>
