@@ -94,8 +94,14 @@
             <div class="card" style="--xShift: -4; --yShift: 0;">
                 <img src="cards/enter.png" alt="enter">
             </div>
+            <div class="card" style="--xShift: 4; --yShift: 2;">
+                <img src="cards/hidden.png" alt="enter">
+            </div>
             <div class="card" style="--xShift: 4; --yShift: 0;">
-                <img src="cards/enter.png" alt="enter">
+                <img src="cards/hidden.png" alt="enter">
+            </div>
+            <div class="card" style="--xShift: 4; --yShift: -2;">
+                <img src="cards/hidden.png" alt="enter">
             </div>
             <div id="circle"></div>
             <div class="barH" style="--factor: -1;"></div>
@@ -137,6 +143,17 @@
             }
             document.onpointerup = function(e){
                 moving = false
+            }
+            //change size of cards on scroll
+            document.onwheel = function(e){
+                if(e.deltaY > 0){
+                    cardHeight -= 5
+                    cardWidth = cardHeight*.8
+                }else{
+                    cardHeight += 5
+                    cardWidth = cardHeight*.8
+                }
+                document.body.style.setProperty("--cardHeight", cardHeight)
             }
         </script>
     </body>
