@@ -17,21 +17,22 @@
             }
             #topbar, #bottombar{
                 height: 10vh;
-                background-color: #000;
+                background-color: #3f3f3f;
                 color: white;
             }
             #left, #center, #rigth{
                 width: 20%;
-                background-color: #000;
+                background-color: #3f3f3f;
             }
             #center{
                 width: 60%;
             }
             #game{
                 height: 80vh;
-                background-color: orange;
+                background-color: black;
                 position: relative;
                 overflow: hidden;
+                cursor: none;
             }
             .card{ /* 240x300 */
                 --xShift: 0;
@@ -67,6 +68,7 @@
                 height: var(--circleSize);
                 border-radius: 50%;
                 overflow: hidden;
+                background: radial-gradient(rgba(255, 255, 255, 0.5), rgba(0, 0, 0, 0), rgba(0, 0, 0, 0));
             }
             .barH, .barV{
                 position: absolute;
@@ -74,7 +76,7 @@
                 left: 0;
                 width: 2px;
                 height: 2px; 
-                background: white;
+                background: #757575;
             }
             .barH{
                 height: 100%;
@@ -95,17 +97,19 @@
             <div id="rigth"></div>
         </div>
         <div id="game">
-            <div class="card" style="--xShift: -4; --yShift: 0;">
-                <img src="cards/enter.png" alt="enter">
-            </div>
-            <div class="card" style="--xShift: 4; --yShift: 2;">
-                <img src="cards/hidden.png" alt="enter">
-            </div>
-            <div class="card" style="--xShift: 4; --yShift: 0;">
-                <img src="cards/hidden.png" alt="enter">
-            </div>
-            <div class="card" style="--xShift: 4; --yShift: -2;">
-                <img src="cards/hidden.png" alt="enter">
+            <div id="cards">
+                <div class="card" style="--xShift: -4; --yShift: 0;">
+                    <img src="cards/enter.png" alt="enter">
+                </div>
+                <div class="card" style="--xShift: 4; --yShift: 2;">
+                    <img src="cards/hidden.png" alt="enter">
+                </div>
+                <div class="card" style="--xShift: 4; --yShift: 0;">
+                    <img src="cards/hidden.png" alt="enter">
+                </div>
+                <div class="card" style="--xShift: 4; --yShift: -2;">
+                    <img src="cards/hidden.png" alt="enter">
+                </div>
             </div>
             <div id="circle">
                 <div class="barH" style="--factor: -3;"></div>
@@ -126,6 +130,20 @@
             document.body.style.setProperty("--cardHeight", cardHeight)
             let x=0, xx=0, xxx=0, cardPosX=0
             let y=0, yy=0, yyy=0, cardPosY=0
+            function placeCard(card, x, y){
+                document.querySelector("#cards").innerHTML +=`
+                <div class="card" style="--xShift: ${x}; --yShift: ${y};">
+                    <img src="cards/${card}.png" alt="enter">
+                </div>
+                `
+            }
+            function removeCard(x, y){
+                for (i in document.querySelectorAll(".card")){
+                    if (document.querySelectorAll(".card")[i].style.getPropertyValue("--xShift") == x && document.querySelectorAll(".card")[i].style.getPropertyValue("--yShift") == y){
+                        document.querySelectorAll(".card")[i].remove()
+                    }
+                }
+            }
             function updateValues(){
                 document.body.style.setProperty("--x", x)
                 document.body.style.setProperty("--y", y)
@@ -148,9 +166,11 @@
                 updateValues()
             }
             document.querySelector("#game").onpointerdown = function(e){
-                moving = true
-                xxx = e.clientX
-                yyy = e.clientY
+                if (e.buttons == 1){
+                    moving = true
+                    xxx = e.clientX
+                    yyy = e.clientY 
+                }
             }
             document.onpointerup = function(e){
                 moving = false
@@ -158,9 +178,13 @@
             document.querySelector("#game").onwheel = function(e){
                 if(e.deltaY > 0){
                     if (cardHeight <= 20) return
+                    x -= x/cardWidth*4
+                    y -= y/cardHeight*5
                     cardHeight -= 5
                     cardWidth = cardHeight*.8
                 }else{
+                    x += x/cardWidth*4
+                    y += y/cardHeight*5
                     cardHeight += 5
                     cardWidth = cardHeight*.8
                 }
