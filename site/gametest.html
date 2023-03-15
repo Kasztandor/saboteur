@@ -143,7 +143,7 @@
             </div>
         </div>
         <div id="bottombar"></div>
-        <div id="resetPosition" onclick="resetPosition()"><i class="icon-arrows-cw"></i></div>
+        <div id="resetPosition" onclick="resetPosition()" title="Reset position of gameboard"><i class="icon-arrows-cw"></i></div>
         <script>
             let moving = false, autoMoving = false
             let cardHeight = 90
@@ -180,8 +180,9 @@
                     autoMoving = true
                     let initialX = x, initialY = y
                     for (let i=0; i<50; i++){
-                        setTimeout(function(j=i){
-                            x = initialX*j
+                        setTimeout(function(j=(i/50)){
+                            x = initialX*(1-(Math.sin((j-0.5)*Math.PI)+1)/2)
+                            y = initialY*(1-(Math.sin((j-0.5)*Math.PI)+1)/2)
                             updateValues()
                         },i*20)
                     }
@@ -213,12 +214,10 @@
             }
             document.onpointerup = function(e){
                 moving = false
-                if (x==0 && y==0){
+                if (x==0 && y==0)
                     document.querySelector("#resetPosition").style.setProperty("display", "none")
-                }
-                else{
+                else
                     document.querySelector("#resetPosition").style.setProperty("display", "block")
-                }
             }
             document.querySelector("#game").onwheel = function(e){
                 let multiplayer
@@ -237,6 +236,10 @@
                 cardHeight += 5*multiplayer
                 cardWidth = cardHeight*.8
                 document.body.style.setProperty("--cardHeight", cardHeight)
+                if (x==0 && y==0)
+                    document.querySelector("#resetPosition").style.setProperty("display", "none")
+                else
+                    document.querySelector("#resetPosition").style.setProperty("display", "block")
                 updateValues()
             }
         </script>
