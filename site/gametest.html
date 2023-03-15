@@ -4,6 +4,8 @@
         <title>Saboteur</title>
         <meta charset="utf-8">
         <style>
+            @import url('fontello/css/fontello.css');
+
             html, body{
                 margin: 0;
                 padding: 0;
@@ -33,6 +35,24 @@
                 position: relative;
                 overflow: hidden;
                 cursor: none;
+            }
+            #resetPosition{
+                position: absolute;
+                right: 10px;
+                top: calc(10px + 10vh);
+                text-align: center;
+                width: 40px;
+                height: 40px;
+                line-height: 40px;
+                border-radius: 5px;
+                color: white;
+                background: #3f3f3f;
+                display: none;
+            }
+            #resetPosition:hover{
+                background-color: #757575;
+                color: black;
+                cursor: pointer;
             }
             .card{ /* 240x300 */
                 --xShift: 0;
@@ -123,8 +143,9 @@
             </div>
         </div>
         <div id="bottombar"></div>
+        <div id="resetPosition" onclick="resetPosition()"><i class="icon-arrows-cw"></i></div>
         <script>
-            let moving = false
+            let moving = false, autoMoving = false
             let cardHeight = 90
             let cardWidth = cardHeight*.8
             document.body.style.setProperty("--cardHeight", cardHeight)
@@ -154,10 +175,28 @@
                 document.body.style.setProperty("--cardX", cardPosX)
                 document.body.style.setProperty("--cardY", cardPosY)
             }
+            function resetPosition(){
+                if (autoMoving == false){
+                    autoMoving = true
+                    let initialX = x, initialY = y
+                    for (let i=0; i<50; i++){
+                        setTimeout(function(j=i){
+                            x = initialX*j
+                            updateValues()
+                        },i*20)
+                    }
+                    setTimeout(function(){
+                        x = 0, y = 0
+                        updateValues()
+                        document.querySelector("#resetPosition").style.setProperty("display", "none")
+                        autoMoving = false
+                    },1000)
+                }
+            }
             document.onmousemove = function(e){
                 xx = e.clientX
                 yy = e.clientY
-                if(moving){
+                if(moving && autoMoving == false){
                     x += xxx - xx
                     y += yyy - yy
                     xxx = xx
@@ -174,20 +213,29 @@
             }
             document.onpointerup = function(e){
                 moving = false
+                if (x==0 && y==0){
+                    document.querySelector("#resetPosition").style.setProperty("display", "none")
+                }
+                else{
+                    document.querySelector("#resetPosition").style.setProperty("display", "block")
+                }
             }
             document.querySelector("#game").onwheel = function(e){
+                let multiplayer
                 if(e.deltaY > 0){
                     if (cardHeight <= 20) return
-                    x -= x/cardWidth*4
-                    y -= y/cardHeight*5
-                    cardHeight -= 5
-                    cardWidth = cardHeight*.8
+                    multiplayer = -1
                 }else{
-                    x += x/cardWidth*4
-                    y += y/cardHeight*5
-                    cardHeight += 5
-                    cardWidth = cardHeight*.8
+                    multiplayer = 1
                 }
+                // motion relative to center of screen
+                //x += x/cardWidth*4*multiplayer
+                //y += y/cardHeight*5*multiplayer
+                // motion relative to cursor
+                x += Math.round((((xx-window.innerWidth/2)+x)/cardWidth)*4*multiplayer)
+                y += Math.round((((yy-window.innerHeight/2)+y)/cardHeight)*5*multiplayer)
+                cardHeight += 5*multiplayer
+                cardWidth = cardHeight*.8
                 document.body.style.setProperty("--cardHeight", cardHeight)
                 updateValues()
             }
