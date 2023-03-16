@@ -15,17 +15,30 @@
                 --mouseX: -1000;
                 --mouseY: -1000;
             }
+            #topbar, #bottombar{
+                height: calc(10vh - 1px);
+                background-color: #3f3f3f;
+                color: white;
+                overflow: hidden;
+                width: 100vw;
+            }
             #topbar{
                 display: flex;
                 border-bottom: 1px solid black;
             }
             #bottombar{
                 border-top: 1px solid black;
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+                overflow-x: scroll;
             }
-            #topbar, #bottombar{
-                height: calc(10vh - 1px);
-                background-color: #3f3f3f;
-                color: white;
+            #bottombar img{
+                padding: 0;
+                margin: 0 1vw;
+                height: 80%;
+                outline: 1px solid black;
             }
             #left, #center, #rigth{
                 width: 20%;
@@ -121,6 +134,19 @@
                 top: calc(40vh + var(--cardHeight)*0.5px*var(--factor) - var(--cardY)*var(--cardHeight)*-1px - var(--y)*1px - var(--circleTop));
                 transform: translate(0, -50%);
             }
+            #selectedField{
+                position: absolute;
+                top: 50vh;
+                top: calc(var(--cardHeight)*1px*var(--cardY) + 40vh - var(--y)*1px);
+                left: calc(var(--cardHeight)*0.8px*var(--cardX) + 50vw - var(--x)*1px);
+                transform: translate(-50%,-50%);
+                width: calc(var(--cardHeight)*0.8px - 2px);
+                height: calc(var(--cardHeight)*1px - 2px);
+                border: 4px solid white;
+            }
+            .hidden{
+                display: none;
+            }
         </style>
     </head>
     <body style="--x: 0; --y: 0;">
@@ -154,8 +180,10 @@
                 <div class="barH" style="--factor: 3;"></div>
                 <div class="barV" style="--factor: 3;"></div>
             </div>
+            <div id="selectedField" class="hidden"></div>
         </div>
         <div id="bottombar"></div>
+
         <div id="resetPosition" onclick="resetPosition()" title="Reset position of gameboard"><i class="icon-arrows-cw"></i></div>
         <div id="zoomIn" onclick='zoom(1, "screen")' title="Zoom in"><i class="icon-plus"></i></div>
         <div id="zoomOut" onclick='zoom(-1, "screen")' title="Zoom out"><i class="icon-minus"></i></div>
@@ -166,6 +194,11 @@
             document.body.style.setProperty("--cardHeight", cardHeight)
             let x=0, xx=0, xxx=0, cardPosX=0
             let y=0, yy=0, yyy=0, cardPosY=0
+            let allowedPlaces = ["0:0"]
+
+            function newCard(card){
+                document.querySelector("#bottombar").innerHTML+=`<img src="cards/${card}.png"></img>`
+            }
             function placeCard(card, x, y){
                 document.querySelector("#cards").innerHTML +=`
                 <div class="card" style="--xShift: ${x}; --yShift: ${y};">
@@ -189,6 +222,11 @@
                 cardPosY = Math.round((yy + y - window.innerHeight/2) / cardHeight)
                 document.body.style.setProperty("--cardX", cardPosX)
                 document.body.style.setProperty("--cardY", cardPosY)
+                if (allowedPlaces.includes(cardPosX+":"+cardPosY)){
+                    document.querySelector("#selectedField").classList.remove("hidden")
+                } else {
+                    document.querySelector("#selectedField").classList.add("hidden")
+                }
             }
             function resetPosition(){
                 if (autoMoving == false){
@@ -235,6 +273,14 @@
                         document.querySelector("#resetPosition").style.setProperty("display", "none")
                     else
                         document.querySelector("#resetPosition").style.setProperty("display", "block")
+                    if (cardHeight < 30){
+                        document.querySelector("#zoomOut").style.setProperty("display", "none")
+                        document.querySelector("#resetPosition").style.setProperty("right", "70px")
+                    }
+                    else{
+                        document.querySelector("#zoomOut").style.setProperty("display","block")
+                        document.querySelector("#resetPosition").style.setProperty("right", "130px")
+                    }
                     updateValues()
                 }
             }
@@ -262,6 +308,7 @@
                     document.querySelector("#resetPosition").style.setProperty("display", "none")
                 else
                     document.querySelector("#resetPosition").style.setProperty("display", "block")
+                document.querySelector("#selectedField").classList.add("hidden")
             }
             document.querySelector("#game").onwheel = function(e){
                 let multiplayer
