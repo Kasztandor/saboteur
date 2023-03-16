@@ -11,14 +11,19 @@
                 padding: 0;
                 height: 100%;
                 text-align: center;
+                color: white;
                 --mouseX: -1000;
                 --mouseY: -1000;
             }
             #topbar{
                 display: flex;
+                border-bottom: 1px solid black;
+            }
+            #bottombar{
+                border-top: 1px solid black;
             }
             #topbar, #bottombar{
-                height: 10vh;
+                height: calc(10vh - 1px);
                 background-color: #3f3f3f;
                 color: white;
             }
@@ -36,23 +41,31 @@
                 overflow: hidden;
                 cursor: none;
             }
-            #resetPosition{
+            #resetPosition, #zoomIn, #zoomOut{
                 position: absolute;
-                right: 10px;
                 top: calc(10px + 10vh);
                 text-align: center;
                 width: 40px;
                 height: 40px;
                 line-height: 40px;
-                border-radius: 5px;
-                color: white;
+                border-radius: 5px;;
                 background: #3f3f3f;
-                display: none;
+                border: 1px solid black;
             }
-            #resetPosition:hover{
+            #resetPosition:hover, #zoomIn:hover, #zoomOut:hover{
                 background-color: #757575;
                 color: black;
                 cursor: pointer;
+            }
+            #zoomIn{
+                right: 10px;
+            }
+            #zoomOut{
+                right: 70px;
+            }
+            #resetPosition{
+                right: 130px;
+                display: none;
             }
             .card{ /* 240x300 */
                 --xShift: 0;
@@ -144,6 +157,8 @@
         </div>
         <div id="bottombar"></div>
         <div id="resetPosition" onclick="resetPosition()" title="Reset position of gameboard"><i class="icon-arrows-cw"></i></div>
+        <div id="zoomIn" onclick='zoom(1, "screen")' title="Zoom in"><i class="icon-plus"></i></div>
+        <div id="zoomOut" onclick='zoom(-1, "screen")' title="Zoom out"><i class="icon-minus"></i></div>
         <script>
             let moving = false, autoMoving = false
             let cardHeight = 90
@@ -181,6 +196,10 @@
                     let initialX = x, initialY = y
                     for (let i=0; i<50; i++){
                         setTimeout(function(j=(i/50)){
+                            // ugly motion
+                            //x = initialX*(1-j)
+                            //y = initialY*(1-j)
+                            // nice motion accordig to sinusoid
                             x = initialX*(1-(Math.sin((j-0.5)*Math.PI)+1)/2)
                             y = initialY*(1-(Math.sin((j-0.5)*Math.PI)+1)/2)
                             updateValues()
@@ -192,6 +211,31 @@
                         document.querySelector("#resetPosition").style.setProperty("display", "none")
                         autoMoving = false
                     },1000)
+                }
+            }
+            function zoom(multiplayer, accordigTo){
+                multiplayer = Math.round(multiplayer)
+                if (multiplayer > 0 || cardHeight >= 30){
+                    // motion relative to center of  screen
+                    if (accordigTo == "screen"){
+                        x += x/cardWidth*4*multiplayer
+                        y += y/cardHeight*5*multiplayer
+                    }
+                    // motion relative to cursor
+                    else if (accordigTo = "cursor"){
+                        x += Math.round((((xx-window.innerWidth/2)+x)/cardWidth)*4*multiplayer)
+                        y += Math.round((((yy-window.innerHeight/2)+y)/cardHeight)*5*multiplayer)
+                    }
+                    else
+                        return
+                    cardHeight += 5*multiplayer
+                    cardWidth = cardHeight*.8
+                    document.body.style.setProperty("--cardHeight", cardHeight)
+                    if (x==0 && y==0)
+                        document.querySelector("#resetPosition").style.setProperty("display", "none")
+                    else
+                        document.querySelector("#resetPosition").style.setProperty("display", "block")
+                    updateValues()
                 }
             }
             document.onmousemove = function(e){
@@ -223,24 +267,10 @@
                 let multiplayer
                 if(e.deltaY > 0){
                     if (cardHeight <= 20) return
-                    multiplayer = -1
+                    zoom(-1, "cursor")
                 }else{
-                    multiplayer = 1
+                    zoom(1, "cursor")
                 }
-                // motion relative to center of screen
-                //x += x/cardWidth*4*multiplayer
-                //y += y/cardHeight*5*multiplayer
-                // motion relative to cursor
-                x += Math.round((((xx-window.innerWidth/2)+x)/cardWidth)*4*multiplayer)
-                y += Math.round((((yy-window.innerHeight/2)+y)/cardHeight)*5*multiplayer)
-                cardHeight += 5*multiplayer
-                cardWidth = cardHeight*.8
-                document.body.style.setProperty("--cardHeight", cardHeight)
-                if (x==0 && y==0)
-                    document.querySelector("#resetPosition").style.setProperty("display", "none")
-                else
-                    document.querySelector("#resetPosition").style.setProperty("display", "block")
-                updateValues()
             }
         </script>
     </body>

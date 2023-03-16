@@ -1,6 +1,8 @@
 
 .icon-arrows-cw:before { content: '\e800'; } /* '' */
 .icon-logout:before { content: '\e801'; } /* '' */
+.icon-plus:before { content: '\e802'; } /* '' */
+.icon-minus:before { content: '\e803'; } /* '' */
 .icon-spin5:before { content: '\e838'; } /* '' */
 .icon-crown:before { content: '\e844'; } /* '' */
 .icon-crown-plus:before { content: '\e845'; } /* '' */
