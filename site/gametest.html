@@ -35,6 +35,7 @@
                 overflow-x: scroll;
             }
             #bottombar img{
+                position: relative;
                 padding: 0;
                 margin: 0 1vw;
                 height: 80%;
@@ -95,13 +96,6 @@
             }
             .card img{
                 width: 100%;
-            }
-            img{
-                -webkit-user-select: none;
-                -khtml-user-select: none;
-                -moz-user-select: none;
-                -o-user-select: none;
-                user-select: none;
             }
             #circle{
                 --circleSize: calc(var(--cardHeight) * 2px);
@@ -195,10 +189,29 @@
             let x=0, xx=0, xxx=0, cardPosX=0
             let y=0, yy=0, yyy=0, cardPosY=0
             let allowedPlaces = ["0:0"]
+            let isCardDragging = false, cardDragging = false
+            let highestCardId = 0
 
             function newCard(card){
-                document.querySelector("#bottombar").innerHTML+=`<img src="cards/${card}.png"></img>`
+                document.querySelector("#bottombar").innerHTML+=`<img id="card${highestCardId}" class="crd" src="cards/${card}.png"></img>`
+                document.querySelectorAll(".crd").forEach(function(element){
+                    (function(el, id){
+                        el.classList.remove("crd")
+                        el.classList.add("playableCard")
+                        el.onpointerdown = function(){
+                            isCardDragging = true
+                            draggingCard = id
+                            console.log("down")
+                        }
+                        el.ondragstart = function(){
+                            return false
+                        }
+                    })(element, highestCardId)
+                    console.log(element)
+                })
+                highestCardId++
             }
+            newCard("B")
             function placeCard(card, x, y){
                 document.querySelector("#cards").innerHTML +=`
                 <div class="card" style="--xShift: ${x}; --yShift: ${y};">
@@ -222,11 +235,10 @@
                 cardPosY = Math.round((yy + y - window.innerHeight/2) / cardHeight)
                 document.body.style.setProperty("--cardX", cardPosX)
                 document.body.style.setProperty("--cardY", cardPosY)
-                if (allowedPlaces.includes(cardPosX+":"+cardPosY)){
+                if (allowedPlaces.includes(cardPosX+":"+cardPosY) && isCardDragging == true)
                     document.querySelector("#selectedField").classList.remove("hidden")
-                } else {
+                else 
                     document.querySelector("#selectedField").classList.add("hidden")
-                }
             }
             function resetPosition(){
                 if (autoMoving == false){
@@ -303,12 +315,18 @@
                 }
             }
             document.onpointerup = function(e){
-                moving = false
                 if (x==0 && y==0)
                     document.querySelector("#resetPosition").style.setProperty("display", "none")
                 else
                     document.querySelector("#resetPosition").style.setProperty("display", "block")
                 document.querySelector("#selectedField").classList.add("hidden")
+                if (allowedPlaces.includes(cardPosX+":"+cardPosY) && isCardDragging == true){
+                    document.querySelector("#card"+draggingCard).remove()
+                    placeCard("B", cardPosX, cardPosY)
+                }
+                moving = false
+                isCardDragging = false
+                updateValues()
             }
             document.querySelector("#game").onwheel = function(e){
                 let multiplayer
