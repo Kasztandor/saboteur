@@ -151,18 +151,6 @@
         </div>
         <div id="game">
             <div id="cards">
-                <div class="card" style="--xShift: -4; --yShift: 0;">
-                    <img src="cards/enter.png" alt="enter">
-                </div>
-                <div class="card" style="--xShift: 4; --yShift: 2;">
-                    <img src="cards/hidden.png" alt="enter">
-                </div>
-                <div class="card" style="--xShift: 4; --yShift: 0;">
-                    <img src="cards/hidden.png" alt="enter">
-                </div>
-                <div class="card" style="--xShift: 4; --yShift: -2;">
-                    <img src="cards/hidden.png" alt="enter">
-                </div>
             </div>
             <div id="circle">
                 <div class="barH" style="--factor: -3;"></div>
@@ -188,10 +176,51 @@
             document.body.style.setProperty("--cardHeight", cardHeight)
             let x=0, xx=0, xxx=0, cardPosX=0
             let y=0, yy=0, yyy=0, cardPosY=0
-            let allowedPlaces = ["0:0"]
             let isCardDragging = false, cardDragging = false
             let highestCardId = 0
+            let allowedPlaces = [], checkedPlaces = [], cards = {
+                "-4:0": "enter",
+                "4:0": "hidden",
+                "4:-2": "hidden"
+            }
 
+            for (let i in cards){
+                document.querySelector("#cards").innerHTML +=`
+                <div class="card" style="--xShift: ${i.split(":")[0]}; --yShift: ${i.split(":")[1]};">
+                    <img src="cards/${cards[i]}.png" alt="${cards[i]}">
+                </div>
+                `
+            }
+            function checkPlaceable(x=-4, y=0){
+                if (x == -4 && y == 0)
+                    checkedPlaces = []
+                if (checkedPlaces.includes(x+":"+y))
+                    return false
+                checkedPlaces.push(x+":"+y)
+                allowedPlaces = []
+                if (cards[x+":"+y] === undefined)
+                    allowedPlaces.push(x+":"+y)
+                else{
+                    let directions = []
+                    if (cards[x+":"+y].includes("enter")){
+                        directions.push([0,1])
+                        directions.push([1,0])
+                        directions.push([0,-1])
+                        directions.push([-1,0])
+                    }
+                    if (cards[x+":"+y].includes("T"))
+                        directions.push([0,1])
+                    if (cards[x+":"+y].includes("R"))
+                        directions.push([1,0])
+                    if (cards[x+":"+y].includes("B"))
+                        directions.push([0,-1])
+                    if (cards[x+":"+y].includes("L"))
+                        directions.push([-1,0])
+                    for (let i in directions){
+                        checkPlaceable(x+directions[i][0], y+directions[i][1])
+                    }
+                }   
+            }
             function newCard(card){
                 document.querySelector("#bottombar").innerHTML+=`<img id="card${highestCardId}" class="crd" src="cards/${card}.png"></img>`
                 document.querySelectorAll(".crd").forEach(function(element){
@@ -199,23 +228,24 @@
                         el.classList.remove("crd")
                         el.classList.add("playableCard")
                         el.onpointerdown = function(){
+                            checkPlaceable()
                             isCardDragging = true
                             draggingCard = id
-                            console.log("down")
                         }
                         el.ondragstart = function(){
                             return false
                         }
                     })(element, highestCardId)
-                    console.log(element)
                 })
                 highestCardId++
             }
             newCard("B")
-            function placeCard(card, x, y){
+            function placeCard(x, y, id){
+                let card = document.querySelector("#card"+id).src
+                document.querySelector("#card"+id).remove()
                 document.querySelector("#cards").innerHTML +=`
-                <div class="card" style="--xShift: ${x}; --yShift: ${y};">
-                    <img src="cards/${card}.png" alt="enter">
+                <div id="card${id}" class="card" style="--xShift: ${x}; --yShift: ${y*-1};">
+                    <img src="${card}" alt="enter">
                 </div>
                 `
             }
@@ -321,8 +351,7 @@
                     document.querySelector("#resetPosition").style.setProperty("display", "block")
                 document.querySelector("#selectedField").classList.add("hidden")
                 if (allowedPlaces.includes(cardPosX+":"+cardPosY) && isCardDragging == true){
-                    document.querySelector("#card"+draggingCard).remove()
-                    placeCard("B", cardPosX, cardPosY)
+                    placeCard(cardPosX, cardPosY, draggingCard)
                 }
                 moving = false
                 isCardDragging = false
