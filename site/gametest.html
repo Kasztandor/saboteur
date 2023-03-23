@@ -191,8 +191,7 @@
                 document.querySelector("#cards").innerHTML +=`
                 <div class="card" style="--xShift: ${i.split(":")[0]}; --yShift: ${i.split(":")[1]};">
                     <img src="cards/${cards[i]}.png" alt="${cards[i]}">
-                </div>
-                `
+                </div>`
             }
             function checkPlaceable(x=-4, y=0){
                 allowedPlaces = []
@@ -207,7 +206,10 @@
                         if (cards[xx+":"+yy] == undefined){
                             allowedPlaces.push(xx+":"+yy)
                         }else{
-                            check(xx, yy)
+                            print(cards[xx+":"+yy])
+                            if (cards[xx+":"+yy]){
+                                check(xx, yy)
+                            }
                         }
                     }
                 }
@@ -223,7 +225,7 @@
                 img.onpointerdown = ()=>{
                     checkPlaceable()
                     isCardDragging = true
-                    draggingCard = highestCardId
+                    draggingCard = id
                 }
                 img.ondragstart = ()=>{
                     return false
@@ -348,7 +350,7 @@
                 else
                     document.querySelector("#resetPosition").style.setProperty("display", "block")
                 document.querySelector("#selectedField").classList.add("hidden")
-                if (allowedPlaces.includes(cardPosX+":"+cardPosY) && isCardDragging == true){
+                if (isCardDragging == true && allowedPlaces.includes(cardPosX+":"+cardPosY)){
                     placeCard(cardPosX, cardPosY, draggingCard)
                 }
                 moving = false
