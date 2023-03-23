@@ -170,6 +170,9 @@
         <div id="zoomIn" onclick='zoom(1, "screen")' title="Zoom in"><i class="icon-plus"></i></div>
         <div id="zoomOut" onclick='zoom(-1, "screen")' title="Zoom out"><i class="icon-minus"></i></div>
         <script>
+            function print(...args){
+                console.log(...args)
+            }
             let moving = false, autoMoving = false
             let cardHeight = 90
             let cardWidth = cardHeight*.8
@@ -178,7 +181,7 @@
             let y=0, yy=0, yyy=0, cardPosY=0
             let isCardDragging = false, cardDragging = false
             let highestCardId = 0
-            let allowedPlaces = [], checkedPlaces = [], cards = {
+            let directions = {"T":[1,0],"B":[-1,0],"L":[0,-1],"R":[0,1]}, directionsReverse = {"1:0":"T","-1:0":"B","0:-1":"L","0:1":"R"}, lettersReverse = {"B":"T","T":"B","L":"R","R":"L"}, allowedPlaces = [], checkedPlaces = [], cards = {
                 "-4:0": "enter",
                 "4:0": "hidden",
                 "4:-2": "hidden"
@@ -192,53 +195,44 @@
                 `
             }
             function checkPlaceable(x=-4, y=0){
-                if (x == -4 && y == 0)
-                    checkedPlaces = []
-                if (checkedPlaces.includes(x+":"+y))
-                    return false
-                checkedPlaces.push(x+":"+y)
                 allowedPlaces = []
-                if (cards[x+":"+y] === undefined)
-                    allowedPlaces.push(x+":"+y)
-                else{
-                    let directions = []
-                    if (cards[x+":"+y].includes("enter")){
-                        directions.push([0,1])
-                        directions.push([1,0])
-                        directions.push([0,-1])
-                        directions.push([-1,0])
-                    }
-                    if (cards[x+":"+y].includes("T"))
-                        directions.push([0,1])
-                    if (cards[x+":"+y].includes("R"))
-                        directions.push([1,0])
-                    if (cards[x+":"+y].includes("B"))
-                        directions.push([0,-1])
-                    if (cards[x+":"+y].includes("L"))
-                        directions.push([-1,0])
+                checkedPlaces = []
+                function check(x, y){
+                    if (checkedPlaces.includes(x+":"+y))
+                        return
+                    checkedPlaces.push(x+":"+y)
                     for (let i in directions){
-                        checkPlaceable(x+directions[i][0], y+directions[i][1])
+                        let xx = x+directions[i][0]
+                        let yy = y+directions[i][1]
+                        if (cards[xx+":"+yy] == undefined){
+                            allowedPlaces.push(xx+":"+yy)
+                        }else{
+                            check(xx, yy)
+                        }
                     }
-                }   
+                }
+                check(x, y)
+                console.log(allowedPlaces)
             }
-            function newCard(card){
-                document.querySelector("#bottombar").innerHTML+=`<img id="card${highestCardId}" class="crd" src="cards/${card}.png"></img>`
-                document.querySelectorAll(".crd").forEach(function(element){
-                    (function(el, id){
-                        el.classList.remove("crd")
-                        el.classList.add("playableCard")
-                        el.onpointerdown = function(){
-                            checkPlaceable()
-                            isCardDragging = true
-                            draggingCard = id
-                        }
-                        el.ondragstart = function(){
-                            return false
-                        }
-                    })(element, highestCardId)
-                })
-                highestCardId++
+            function newCard(card, id=(highestCardId+1)){
+                let img = document.createElement("img")
+                img.src = "cards/"+card+".png"
+                img.id = "card"+id
+                img.classList.add("playableCard")
+                img.classList.add("playableCard")
+                img.onpointerdown = ()=>{
+                    checkPlaceable()
+                    isCardDragging = true
+                    draggingCard = highestCardId
+                }
+                img.ondragstart = ()=>{
+                    return false
+                }
+                document.querySelector("#bottombar").appendChild(img)
+                highestCardId = id
             }
+            newCard("BL")
+            newCard("L")
             newCard("B")
             function placeCard(x, y, id){
                 let card = document.querySelector("#card"+id).src
@@ -248,6 +242,7 @@
                     <img src="${card}" alt="enter">
                 </div>
                 `
+                cards[x+":"+y] = id
             }
             function removeCard(x, y){
                 for (i in document.querySelectorAll(".card")){
@@ -265,23 +260,26 @@
                 cardPosY = Math.round((yy + y - window.innerHeight/2) / cardHeight)
                 document.body.style.setProperty("--cardX", cardPosX)
                 document.body.style.setProperty("--cardY", cardPosY)
+                document.querySelector("#center").innerHTML = cardPosX+":"+cardPosY
                 if (allowedPlaces.includes(cardPosX+":"+cardPosY) && isCardDragging == true)
                     document.querySelector("#selectedField").classList.remove("hidden")
                 else 
                     document.querySelector("#selectedField").classList.add("hidden")
             }
-            function resetPosition(){
+            function resetPosition(sinusoidal = true){
                 if (autoMoving == false){
                     autoMoving = true
                     let initialX = x, initialY = y
                     for (let i=0; i<50; i++){
                         setTimeout(function(j=(i/50)){
-                            // ugly motion
-                            //x = initialX*(1-j)
-                            //y = initialY*(1-j)
-                            // nice motion accordig to sinusoid
-                            x = initialX*(1-(Math.sin((j-0.5)*Math.PI)+1)/2)
-                            y = initialY*(1-(Math.sin((j-0.5)*Math.PI)+1)/2)
+                            if (sinusoidal == true){
+                                x = initialX*(1-(Math.sin((j-0.5)*Math.PI)+1)/2)
+                                y = initialY*(1-(Math.sin((j-0.5)*Math.PI)+1)/2)
+                            }
+                            else{
+                                x = initialX*(1-j)
+                                y = initialY*(1-j)
+                            }
                             updateValues()
                         },i*20)
                     }
